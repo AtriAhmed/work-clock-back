@@ -4,24 +4,20 @@ const saltRounds = 10
 
 module.exports = {
   createNewUser: (req, res) => {
-    if (req.isAuthenticated()) {
-      const userData = req.body.vals // grab onto the new user array of values
-      bcrypt.hash(userData[1], saltRounds, (err, hash) => {
-        if (err) {
-          console.error(err)
-        }
-        // use the index of the password value to pass to bcrypt
-        // Store hash in your password DB.
-        userData[1] = hash // replace plain text password with hash
-        // console.log(userData)
-        db.User.insertOne(userData, result => {
-          // save new user with hashed password to database
-          res.status(200).json({ id: result.insertId })
-        })
+    const userData = req.body.vals // grab onto the new user array of values
+    bcrypt.hash(userData[1], saltRounds, (err, hash) => {
+      if (err) {
+        console.error(err)
+      }
+      // use the index of the password value to pass to bcrypt
+      // Store hash in your password DB.
+      userData[1] = hash // replace plain text password with hash
+      // console.log(userData)
+      db.User.insertOne(userData, result => {
+        // save new user with hashed password to database
+        res.status(200).json({ id: result.insertId })
       })
-    } else {
-      res.status(400)
-    }
+    })
   },
   getAllUsers: (req, res) => {
     db.User.selectAll(data => {

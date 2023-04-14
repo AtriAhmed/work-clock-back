@@ -14,12 +14,10 @@ const PORT = process.env.PORT
 const cors = require("cors")
 var corsOptions = {
   credentials: true,
-  origin: ['http://localhost:3000','http://localhost:5173']
+  origin: ['http://localhost:3000', 'http://localhost:5173']
 }
 
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static('client/build'))
-}
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cors(corsOptions))

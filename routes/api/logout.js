@@ -10,7 +10,7 @@ router.route('/').get((req, res) => {
       user: {
         accessId: 0,
         type: 'visitor',
-        userId: 0,
+        _id: 0,
         username: ''
       }
     })
