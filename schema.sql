@@ -8,10 +8,10 @@ set foreign_key_checks=0;
 
 CREATE TABLE users (
     _id int(6) NOT NULL AUTO_INCREMENT,
-    username varchar(20) NOT NULL UNIQUE,
+    username varchar(20) NOT NULL,
+    email varchar(255) NOT NULL UNIQUE,
     password varchar(255) NOT NULL,
     accessId int(3) NOT NULL,
-    FOREIGN KEY (accessId) REFERENCES accessLevels(permissionLevel) ON DELETE RESTRICT ON UPDATE CASCADE,
     active boolean DEFAULT 1,
     PRIMARY KEY (_id)
 );

@@ -3,7 +3,7 @@ const connection = require('../config/connection') // import the connection from
 // Build a user Model to export to the controllers
 const User = {
   selectAll: cb => {
-    const queryString = `SELECT u._id, u.username, u.accessId, a.type 
+    const queryString = `SELECT u._id, u.username, u.email, u.accessId, a.type 
       FROM users AS u 
       INNER JOIN accessLevels AS a 
       ON u.accessId=a.permissionLevel 
@@ -14,11 +14,11 @@ const User = {
     })
   },
   getUserByUsernameWithPassword: (username, done) => {
-    const queryString = `SELECT u._id, u.username,u.password, u.accessId, a.type 
+    const queryString = `SELECT u._id, u.username, u.email, u.password, u.accessId, a.type 
       FROM users AS u 
       INNER JOIN accessLevels AS a 
       ON u.accessId=a.permissionLevel 
-      WHERE username=? 
+      WHERE email=? 
       LIMIT 1;`
     connection.execute(queryString, [username], (err, user) => {
       if (err) {
@@ -28,7 +28,7 @@ const User = {
     })
   },
   getUserById: (id, done) => {
-    const queryString = `SELECT u._id, u.username, u.accessId, a.type 
+    const queryString = `SELECT u._id, u.username, u.email, u.accessId, a.type 
       FROM users AS u 
       INNER JOIN accessLevels AS a 
       ON u.accessId=a.permissionLevel WHERE _id=? 
@@ -41,7 +41,7 @@ const User = {
     })
   },
   selectOneById: (id, cb) => {
-    const queryString = `SELECT u._id, u.username, u.accessId, a.type 
+    const queryString = `SELECT u._id, u.username, u.email, u.accessId, a.type 
       FROM users AS u 
       INNER JOIN accessLevels AS a 
       ON u.accessId=a.permissionLevel 
@@ -53,11 +53,11 @@ const User = {
     })
   },
   selectOneByUsername: (username, cb) => {
-    const queryString = `SELECT u._id, u.username, u.accessId, a.type 
+    const queryString = `SELECT u._id, u.username, u.email, u.accessId, a.type 
       FROM users AS u 
       INNER JOIN accessLevels AS a 
       ON u.accessId=a.permissionLevel 
-      WHERE username=? 
+      WHERE email=? 
       LIMIT 1;`
     connection.execute(queryString, [username], (err, results) => {
       if (err) throw err
@@ -74,8 +74,8 @@ const User = {
   },
   insertOne: (vals, cb) => {
     const queryString = `INSERT INTO users 
-    (username, password, accessId)
-     VALUES (?,?,?)`
+    (username, email, password, accessId)
+     VALUES (?,?,?,?)`
     connection.execute(queryString, vals, (err, result) => {
       if (err) throw err
       cb(result)
@@ -84,7 +84,7 @@ const User = {
   updateOne: (vals, id, cb) => {
     vals.push(id)
     const queryString =
-      'UPDATE users SET username=?, password=?, accessId=? WHERE _id=?;'
+      'UPDATE users SET username=?, u.email=?, password=?, accessId=? WHERE _id=?;'
     connection.execute(queryString, vals, (err, result) => {
       if (err) throw err
       cb(result)

@@ -4,16 +4,22 @@ const saltRounds = 10
 
 module.exports = {
   createNewUser: (req, res) => {
-    const userData = req.body.vals // grab onto the new user array of values
-    bcrypt.hash(userData[1], saltRounds, (err, hash) => {
+    const body = req.body
+    bcrypt.hash(body.password, saltRounds, (err, hash) => {
       if (err) {
         console.error(err)
       }
       // use the index of the password value to pass to bcrypt
       // Store hash in your password DB.
-      userData[1] = hash // replace plain text password with hash
+      const user = [
+        body.username,
+        body.email,
+        hash,
+        body.accessId
+      ]
+      console.log(user)
       // console.log(userData)
-      db.User.insertOne(userData, result => {
+      db.User.insertOne(user, result => {
         // save new user with hashed password to database
         res.status(200).json({ id: result.insertId })
       })

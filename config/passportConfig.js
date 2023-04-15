@@ -20,7 +20,7 @@ module.exports = passport => {
 
   passport.use(
     new LocalStrategy(
-      { passReqToCallback: true },
+      { usernameField: "email", passwordField: "password", passReqToCallback: true },
       (req, username, password, done) => {
         // console.log(`Pass port use local-strategy sign in attempt for: ${username}`)
 
@@ -53,7 +53,7 @@ module.exports = passport => {
 
                   done(err)
                 } else if (result) {
-                  // console.log(`Successful login for User: ${user.username} ID: ${user.userId} Type:${user.type} type-ID:${user.accessId} removing pw from userObj and attaching to future requests`)
+                  // console.log(`Successful login for User: ${user.username} ID: ${user._id} Type:${user.type} type-ID:${user.accessId} removing pw from userObj and attaching to future requests`)
 
                   delete user.password
                   done(null, user)
@@ -66,9 +66,11 @@ module.exports = passport => {
             }
           })
         } else if (req.user) {
+          console.log(username + " /" + password + "/" + req.user)
           // console.log('User attempted to log in while already logged in.')
           done(null, req.user)
         } else {
+          console.log(username + " /" + password + "/" + req.user)
           // console.log('Login attempt did not meet username and password requirements.')
           return done(null, false)
         }
