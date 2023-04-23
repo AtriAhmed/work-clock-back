@@ -1,4 +1,6 @@
-const db = require('../models/index.js')
+
+const User = require("../models/User");
+const AccessLevel = require("../models/AccessLevel");
 const bcrypt = require('bcrypt')
 const saltRounds = 10
 
@@ -9,52 +11,129 @@ module.exports = {
       if (err) {
         console.error(err)
       }
-      // use the index of the password value to pass to bcrypt
-      // Store hash in your password DB.
-      const user = [
-        body.username,
-        body.email,
-        hash,
-        body.accessId
-      ]
-      console.log(user)
-      // console.log(userData)
-      db.User.insertOne(user, result => {
-        // save new user with hashed password to database
-        res.status(200).json({ id: result.insertId })
-      })
+      const user = {
+        username: body.username,
+        email: body.email,
+        password: hash,
+        accessId: body.accessId
+      }
+      User.create(user)
+        .then(result => {
+          res.status(200).json({ id: result.id })
+        })
+        .catch(error => {
+          console.error(error)
+          res.status(500).json({ error })
+        })
     })
   },
   getAllUsers: (req, res) => {
-    db.User.selectAll(data => {
-      res.status(200).json(data)
+    User.findAll({
+      attributes: ['_id', 'username', 'email', 'accessId'],
+      include: [
+        {
+          model: AccessLevel,
+          attributes: ['type']
+        }
+      ],
+      order: [['_id', 'ASC']]
     })
+      .then(data => {
+        res.status(200).json(data)
+      })
+      .catch(error => {
+        console.error(error)
+        res.status(500).json({ error })
+      })
   },
   getUserById: (req, res) => {
-    db.User.selectOneById(req.params.id, data => {
-      res.status(200).json(data)
+    User.findByPk(req.params.id, {
+      attributes: ['_id', 'username', 'email', 'accessId'],
+      include: [
+        {
+          model: AccessLevel,
+          attributes: ['type']
+        }
+      ]
     })
+      .then(data => {
+        res.status(200).json(data)
+      })
+      .catch(error => {
+        console.error(error)
+        res.status(500).json({ error })
+      })
   },
   updateUserById: (req, res) => {
-    const userData = req.body.vals // grab onto the new user array of values
-    bcrypt.hash(userData[1], saltRounds, (err, hash) => {
-      if (err) {
-        console.error(err)
-      }
-      // use the index of the password value to pass to bcrypt
-      userData[1] = hash // replace plain text password with hash
-      db.User.updateOne(userData, req.params.id, result => {
-        if (result.changedRows === 0) {
-          res.status(204).end()
-        } else {
-          res.status(200).end()
+    const userData = req.body
+    if (userData.password) {
+      bcrypt.hash(userData.password, saltRounds, (err, hash) => {
+        if (err) {
+          console.error(err)
         }
+        userData.password = hash
+        console.log("params", req.params)
+        User.update(userData, {
+          where: { _id: req.params.id }
+        })
+          .then(result => {
+            if (result[0] === 0) {
+              res.status(204).end()
+            } else {
+              res.status(200).end()
+            }
+          })
+          .catch(error => {
+            console.error(error)
+            res.status(500).json({ error })
+          })
       })
-    })
+    } else {
+      console.log("params", req.params)
+      User.update(userData, {
+        where: { _id: req.params.id }
+      })
+        .then(result => {
+          if (result[0] === 0) {
+            res.status(204).end()
+          } else {
+            res.status(200).end()
+          }
+        })
+        .catch(error => {
+          console.error(error)
+          res.status(500).json({ error })
+        })
+    }
   },
   deleteUserById: (req, res) => {
-    db.User.deleteOne(req.params.id, data => {
-      res.status(200).json(data)
+    console.log("came here")
+    User.destroy({
+      where: { _id: req.params.id }
     })
+      .then(data => {
+        res.status(200).json(data)
+      })
+      .catch(error => {
+        console.error(error)
+        res.status(500).json({ error })
+      })
+  },
+  getUserByUsernameWithPassword: async (username, done) => {
+    try {
+      const user = await User.findOne({
+        where: {
+          email: username
+        },
+        include: [AccessLevel]
+      })
+      if (user) {
+        done(null, user)
+      } else {
+        done(null, false)
+      }
+    } catch (err) {
+      done(err)
+    }
   }
 }

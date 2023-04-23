@@ -18,6 +18,16 @@ var corsOptions = {
 }
 
 
+const sequelize = require('./config/database');
+
+sequelize.sync().then((res) => {
+  console.log(res);
+}).catch((error) => {
+  console.error('Error syncing models with the database:', error);
+});
+
+
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cors(corsOptions))

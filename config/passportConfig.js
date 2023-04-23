@@ -1,5 +1,7 @@
-const db = require('../models')
+const User = require("../models/User")
+const userController = require('../controllers/userController')
 const bcrypt = require('bcrypt')
+const AccessLevel = require("../models/AccessLevel")
 const LocalStrategy = require('passport-local').Strategy
 
 module.exports = passport => {
@@ -13,9 +15,19 @@ module.exports = passport => {
   // used to deserialize the user
 
   passport.deserializeUser((id, done) => {
-    db.User.getUserById(id, (err, data) => {
-      done(err, data)
-    })
+    User.findByPk(id, {
+      attributes: ['_id', 'username', 'email', 'accessId'],
+      include: [
+        {
+          model: AccessLevel,
+          attributes: ['type']
+        }
+      ]
+    }).then(user => {
+      done(null, user);
+    }).catch(err => {
+      done(err, null);
+    });
   })
 
   passport.use(
@@ -29,7 +41,7 @@ module.exports = passport => {
 
           // console.log('attempting to get user from DB')
 
-          db.User.getUserByUsernameWithPassword(username, (err, user) => {
+          userController.getUserByUsernameWithPassword(username, (err, user) => {
             if (err) {
               // console.log('Error occured getting user from DB to compare against Posted user INFO')
 
@@ -53,7 +65,7 @@ module.exports = passport => {
 
                   done(err)
                 } else if (result) {
-                  // console.log(`Successful login for User: ${user.username} ID: ${user._id} Type:${user.type} type-ID:${user.accessId} removing pw from userObj and attaching to future requests`)
+                  // console.log(`Successful login for User: ${user.username} ID: ${user.userId} Type:${user.type} type-ID:${user.accessId} removing pw from userObj and attaching to future requests`)
 
                   delete user.password
                   done(null, user)
@@ -66,11 +78,9 @@ module.exports = passport => {
             }
           })
         } else if (req.user) {
-          console.log(username + " /" + password + "/" + req.user)
           // console.log('User attempted to log in while already logged in.')
           done(null, req.user)
         } else {
-          console.log(username + " /" + password + "/" + req.user)
           // console.log('Login attempt did not meet username and password requirements.')
           return done(null, false)
         }

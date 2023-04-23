@@ -1,13 +1,27 @@
 const router = require('express').Router()
-const apiRoutes = require('./api')
-const path = require('path')
+const apiRouter = require('express').Router()
+
+const usersRoute = require('./api/users')
+const loginRoute = require('./api/login')
+const logoutRoute = require('./api/logout')
+
+// login route for Users
+apiRouter.use('/login', loginRoute)
+
+// logout route for Users
+apiRouter.use('/logout', logoutRoute)
+
+// '/api/user' for all routes involving User Accounts
+apiRouter.use('/users', usersRoute)
+
+
 
 // API Routes any route starting with '/api'
-router.use('/api', apiRoutes)
+router.use('/api', apiRouter)
 
 // =========== SEND REACT PRODUCTION BUILD ====================
 router.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'))
+  res.status(404).send("Route not found")
 })
 
 module.exports = router
