@@ -4,28 +4,29 @@ const bcrypt = require('bcrypt')
 const AccessLevel = require("../models/AccessLevel")
 const LocalStrategy = require('passport-local').Strategy
 
-module.exports = passport => {
+const { getUserByUsernameWithPassword } = userController.default;
+
+module.exports = (passport:any) => {
   //  ======================== Passport Session Setup ============================
   // required for persistent login sessions passport needs ability to serialize and unserialize users out of session
   // used to serialize the user for the session
-  passport.serializeUser((user, done) => {
+  passport.serializeUser((user:any, done:any) => {
     done(null, user._id)
   })
 
   // used to deserialize the user
 
-  passport.deserializeUser((id, done) => {
+  passport.deserializeUser((id:any, done:any) => {
     User.findByPk(id, {
-      attributes: ['_id', 'username', 'email', 'accessId'],
       include: [
         {
           model: AccessLevel,
           attributes: ['type']
         }
       ]
-    }).then(user => {
+    }).then((user:any) => {
       done(null, user);
-    }).catch(err => {
+    }).catch((err:any) => {
       done(err, null);
     });
   })
@@ -33,15 +34,14 @@ module.exports = passport => {
   passport.use(
     new LocalStrategy(
       { usernameField: "email", passwordField: "password", passReqToCallback: true },
-      (req, username, password, done) => {
+      (req:any, username:string, password:string, done:any) => {
         // console.log(`Pass port use local-strategy sign in attempt for: ${username}`)
 
-        if (!req.user && (!username === '' || password.length >= 5)) {
+        if (!req.user && (!(username === '') || password.length >= 5)) {
           // callback with username and password from client must match basic requirements before even being compared in DB
 
           // console.log('attempting to get user from DB')
-
-          userController.getUserByUsernameWithPassword(username, (err, user) => {
+          getUserByUsernameWithPassword(username, (err:any, user:any) => {
             if (err) {
               // console.log('Error occured getting user from DB to compare against Posted user INFO')
 
@@ -59,7 +59,7 @@ module.exports = passport => {
 
               // console.log(user)
 
-              bcrypt.compare(password, user.password, (err, result) => {
+              bcrypt.compare(password, user.password, (err:any, result:any) => {
                 if (err) {
                   // console.log('error in bcrypt compare')
 
@@ -88,3 +88,5 @@ module.exports = passport => {
     )
   )
 }
+
+export {};

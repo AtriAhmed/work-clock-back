@@ -1,5 +1,5 @@
-const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
+import { DataTypes } from "sequelize";
+const sequelize = require('../config/database.ts');
 
 const AccessLevel = require('./AccessLevel');
 
@@ -9,7 +9,11 @@ const User = sequelize.define('User', {
     primaryKey: true,
     autoIncrement: true
   },
-  username: {
+  firstname: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  lastname: {
     type: DataTypes.STRING,
     allowNull: false
   },
@@ -19,6 +23,30 @@ const User = sequelize.define('User', {
     unique: true
   },
   password: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  position: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  startDate: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
+  },
+  contractType: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  salary: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
+  phone: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  picture: {
     type: DataTypes.STRING,
     allowNull: false
   },

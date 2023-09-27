@@ -1,5 +1,7 @@
-const router = require('express').Router()
-const userController = require('../../controllers/userController')
+import { Router } from 'express';
+import userController from '../../controllers/userController';
+
+const router = Router();
 
 // Matches with "/api/user"
 router
@@ -7,8 +9,7 @@ router
   // GET "/api/user"
   .get(userController.getAllUsers) // Gets all the users
   // POST "/api/user" Example Request: { "vals": ["test_user", "111111", 1] }
-  .post(userController.createNewUser) // create a new user
-//= ======================================================
+  .post(userController.createNewUser); // create a new user
 
 // Matches with "/api/user/:id"
 router
@@ -18,6 +19,6 @@ router
   // PUT "/api/user/:id" Example Request: { "vals": ["test_user", "111111", 1] }
   .put(userController.updateUserById) // update a user by ID
   // DELETE "/api/user/:id"
-  .delete(userController.deleteUserById) // delete a user by ID
+  .delete(userController.deleteUserById); // delete a user by ID
 
-module.exports = router
+  module.exports = router;

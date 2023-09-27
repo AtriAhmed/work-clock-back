@@ -1,14 +1,16 @@
 'use strict'
+import { Response } from "express"
 require('dotenv').config()
 const express = require('express')
 const app = express()
-const routes = require('./routes')
+const routes = require('./src/routes/index.ts')
+const fileUpload = require("express-fileupload");
 
 const passport = require('passport')
-require('./config/passportConfig')(passport) // pass passport for configuration
+require('./src/config/passportConfig')(passport) // pass passport for configuration
 
 const session = require('express-session')
-const sessionStore = require('./config/promiseConnection')
+const sessionStore = require('./src/config/promiseConnection')
 
 const PORT = process.env.PORT
 const cors = require("cors")
@@ -17,12 +19,11 @@ var corsOptions = {
   origin: ['http://localhost:3000', 'http://localhost:5173']
 }
 
+const sequelize = require("./src/config/database")
 
-const sequelize = require('./config/database');
-
-sequelize.sync().then((res) => {
-  console.log(res);
-}).catch((error) => {
+sequelize.sync().then((res:Response) => {
+  console.log("sequelize connected !");
+}).catch((error:any) => {
   console.error('Error syncing models with the database:', error);
 });
 
@@ -30,6 +31,8 @@ sequelize.sync().then((res) => {
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(fileUpload());
+app.use(express.static(__dirname + "/public"));
 app.use(cors(corsOptions))
 app.use(
   session({

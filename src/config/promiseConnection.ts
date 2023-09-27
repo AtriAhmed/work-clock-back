@@ -15,3 +15,5 @@ const sessionOptions = {
 const sessionStore = new MySQLStore(sessionOptions, connection.promise)
 
 module.exports = sessionStore
+
+export {};
