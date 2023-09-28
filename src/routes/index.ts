@@ -5,6 +5,7 @@ const usersRoute = require('./api/users')
 const loginRoute = require('./api/login')
 const logoutRoute = require('./api/logout')
 const accessLevelsRoute = require('./api/accessLevels')
+const workLogsRoute = require('./api/workLogs')
 
 
 // login route for Users
@@ -17,6 +18,8 @@ apiRouter.use('/logout', logoutRoute)
 apiRouter.use('/users', usersRoute)
 
 apiRouter.use('/access-levels', accessLevelsRoute)
+
+apiRouter.use('/work-logs', workLogsRoute)
 
 
 
