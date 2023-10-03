@@ -13,9 +13,9 @@ router
 
 // Matches with "/api/workLog/:id"
 router
-  .route('/:id')
+  .route('/day/:date')
   // GET "/api/workLog/:id"
- // .get(workLogController.getworkLogById)  get workLog data by ID
+ .get(workLogController.getDateWorkLog)
   // PUT "/api/workLog/:id" Example Request: { "vals": ["test_workLog", "111111", 1] }
  // .put(workLogController.updateworkLogById)  update a workLog by ID
   // DELETE "/api/workLog/:id"
@@ -24,5 +24,13 @@ router
  router
  .route("/status")
  .get(workLogController.getWorkClockStatus)
+
+ router
+ .route("/week")
+ .get(workLogController.getWeekWorkLog)
+
+ router
+ .route("/month")
+ .get(workLogController.getMonthWorkLog)
 
   module.exports = router;

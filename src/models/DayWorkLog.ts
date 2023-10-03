@@ -19,6 +19,10 @@ const DayWorkLog = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
+    weekDay:{
+type: DataTypes.TINYINT.UNSIGNED, 
+allowNull:false
+    },
     totalWorkTime: {
       type: DataTypes.FLOAT,
       allowNull: false,
@@ -28,5 +32,7 @@ const DayWorkLog = sequelize.define(
 );
 
 DayWorkLog.belongsTo(User, { foreignKey: 'userId' });
+
+// DayWorkLog.sync({alter:true})
 
 module.exports = DayWorkLog;

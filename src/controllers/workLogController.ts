@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 const WorkLog = require("../models/WorkLog")
 const DayWorkLog = require("../models/DayWorkLog")
+const { Op } = require('sequelize');
 
 const workLogController = {
   createWorkLog: async (req:any, res:any) => {
@@ -13,9 +14,11 @@ const workLogController = {
         where: { userId: userId, date: today },
       });
       
+      const weekDay = today.getDay()
+
       if (!dayWorkLog) {
         // Create a new dayWorkLog if it doesn't exist
-        dayWorkLog = await DayWorkLog.create({userId, date: today });
+        dayWorkLog = await DayWorkLog.create({userId, date: today, weekDay });
       }
       
       // Check if an open workLog exists for the user
@@ -35,15 +38,12 @@ startTimeDate.setSeconds(parseInt(startTimeParts[2], 10));
 
 const endTime = new Date();
 const timeDifference = endTime.getTime() - startTimeDate.getTime() - 3600000;
-console.log(timeDifference)
 
 // Update the open workLog with endTime (clock-out)
 await openWorkLog.update({ endTime });
 
 // Increment the totalWorkTime in dayWorkLog
-console.log(dayWorkLog.totalWorkTime);
 const newTotalWorkTime = dayWorkLog.totalWorkTime + timeDifference;
-console.log(newTotalWorkTime)
 await dayWorkLog.update({ totalWorkTime: newTotalWorkTime });
 } else {
   // Create a new workLog with startTime (clock-in)
@@ -106,9 +106,11 @@ getDayWorkLog: async (req: any, res: Response) => {
       include: WorkLog, // Include associated WorkLog records
     });
 
+    const weekDay = today.getDay();
+
     if (!currentDayWorkLog) {
       // If no current dayWorkLog is found, create one
-      currentDayWorkLog = await DayWorkLog.create({ userId, date: today });
+      currentDayWorkLog = await DayWorkLog.create({ userId, date: today,weekDay });
     }
 
     // The associated workLogs are already included in currentDayWorkLog
@@ -120,35 +122,112 @@ getDayWorkLog: async (req: any, res: Response) => {
     res.status(500).json({ error: "An error occurred." });
   }
 },
-  updateAccessLevel: async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const [updatedRowsCount, [updatedAccessLevel]] = await AccessLevel.update(req.body, {
-        returning: true,
-        where: { id },
-      });
-      if (updatedRowsCount === 0) {
-        return res.status(404).json({ message: 'Access level not found' });
-      }
-      res.status(200).json({ message: 'Access level updated successfully', accessLevel: updatedAccessLevel });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Server Error');
-    }
-  },
+getWeekWorkLog: async (req: any, res: Response) => {
+  try {
+    const userId = req.user._id; // Replace with how you identify the user
 
-  getAccessLevelById: async (req: Request, res: Response) => {
-    try {
-      const { id } = req.params;
-      const accessLevel = await AccessLevel.findByPk(id);
-      if (!accessLevel) {
-        return res.status(404).json({ message: 'AccessLevel not found' });
+    // Calculate the start and end dates for the last week
+    const currentDate = new Date();
+    const endDate = new Date(currentDate);
+    endDate.setHours(0, 0, 0, 0);
+    const lastWeekStartDate = new Date(endDate);
+    lastWeekStartDate.setDate(lastWeekStartDate.getDate() - 6); // Last week starts 6 days ago
+
+    // Query the database for WorkDayLog entries in the last week, excluding Sundays (0) and Saturdays (6)
+    const workDayLogs = await DayWorkLog.findAll({
+      where: {
+        userId: userId,
+        date: {
+          [Op.between]: [lastWeekStartDate, endDate],
+        },
+        weekday: {
+          [Op.notIn]: [0, 6], // Exclude Sunday and Saturday
+        },
+      },
+    });
+
+    // Calculate the total work time by summing up the work times from workDayLogs
+    const totalWorkTimeInSeconds = workDayLogs.reduce(
+      (total:any, workDayLog:any) => total + workDayLog.totalWorkTime,
+      0
+    );
+
+    let result = (totalWorkTimeInSeconds/1000) - (workDayLogs.length * 8 * 60 * 60);
+    
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "An error occurred." });
+  }
+},
+getMonthWorkLog: async (req: any, res: Response) => {
+  try {
+    const userId = req.user._id; // Replace with how you identify the user
+
+    // Calculate the start and end dates for the last week
+    const currentDate = new Date();
+    const endDate = new Date(currentDate);
+    endDate.setHours(0, 0, 0, 0);
+    const lastWeekStartDate = new Date(endDate);
+    lastWeekStartDate.setDate(lastWeekStartDate.getDate() - 30); // Last week starts 6 days ago
+
+    // Query the database for WorkDayLog entries in the last week, excluding Sundays (0) and Saturdays (6)
+    const workDayLogs = await DayWorkLog.findAll({
+      where: {
+        userId: userId,
+        date: {
+          [Op.between]: [lastWeekStartDate, endDate],
+        },
+        weekday: {
+          [Op.notIn]: [0, 6], // Exclude Sunday and Saturday
+        },
+      },
+    });
+
+    const workLogByDate = workDayLogs.reduce((result:any, workLog:any) => {
+      // Extract the date (YYYY-MM-DD) from the work log
+      const date = workLog.date;
+      
+      // If the date doesn't exist in the result object, create an entry for it
+      if (!result[date]) {
+        result[date] = 0;
       }
-      return res.status(200).json(accessLevel);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send('Server Error');
-    }
+     
+      // Add the work time for the date
+      result[date] += workLog.totalWorkTime - (8 * 60 * 60 * 1000);
+    
+      return result;
+    }, {});
+
+    res.status(200).json(workLogByDate);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "An error occurred." });
+  }
+},
+  getDateWorkLog: async (req: any, res: Response) => {
+   try {
+    const userId: number = req.user._id; // Replace with how you identify the user
+
+    // Find the current dayWorkLog for the user (today's date)
+    const date = new Date(req.params.date);
+
+    date.setHours(0, 0, 0, 0);
+
+    let currentDayWorkLog = await DayWorkLog.findOne({
+      where: { userId, date: date },
+      include: WorkLog, // Include associated WorkLog records
+    });
+
+    // The associated workLogs are already included in currentDayWorkLog
+
+    // Return the current dayWorkLog and its associated workLogs
+    res.status(200).json(currentDayWorkLog);
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "An error occurred." });
+  }
   },
 
   deleteAccessLevel: async (req: Request, res: Response) => {
