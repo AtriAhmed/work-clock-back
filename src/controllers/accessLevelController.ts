@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 const AccessLevel = require("../models/AccessLevel")
 
 const accessLevelController = {
-  getAllAccessLevels: async (req: Request, res: Response) => {
+  getAllAccessLevels: async (req: Request, res:Response) => {
     try {
       const accessLevels = await AccessLevel.findAll();
       res.status(200).json(accessLevels);
@@ -12,7 +12,7 @@ const accessLevelController = {
     }
   },
 
-  createAccessLevel: async (req: Request, res: Response) => {
+  createAccessLevel: async (req: Request, res:Response) => {
     try {
       const accessLevel = await AccessLevel.create(req.body);
       res.status(201).json({ message: 'Access level created successfully', accessLevel });
@@ -22,7 +22,7 @@ const accessLevelController = {
     }
   },
 
-  updateAccessLevel: async (req: Request, res: Response) => {
+  updateAccessLevel: async (req: Request, res:Response) => {
     try {
       const { id } = req.params;
       const [updatedRowsCount, [updatedAccessLevel]] = await AccessLevel.update(req.body, {
@@ -39,7 +39,7 @@ const accessLevelController = {
     }
   },
 
-  getAccessLevelById: async (req: Request, res: Response) => {
+  getAccessLevelById: async (req: Request, res:Response) => {
     try {
       const { id } = req.params;
       const accessLevel = await AccessLevel.findByPk(id);
@@ -53,7 +53,7 @@ const accessLevelController = {
     }
   },
 
-  deleteAccessLevel: async (req: Request, res: Response) => {
+  deleteAccessLevel: async (req: Request, res:Response) => {
     try {
       const { id } = req.params;
       const deletedRowCount = await AccessLevel.destroy({ where: { id } });

@@ -13,7 +13,7 @@ router
 
 // Matches with "/api/workLog/:id"
 router
-  .route('/day/:date')
+  .route('/day/:date/:id?')
   // GET "/api/workLog/:id"
  .get(workLogController.getDateWorkLog)
   // PUT "/api/workLog/:id" Example Request: { "vals": ["test_workLog", "111111", 1] }
@@ -32,5 +32,17 @@ router
  router
  .route("/month")
  .get(workLogController.getMonthWorkLog)
+
+ router
+ .route("/month/:id")
+ .get(workLogController.getUserMonthWorkLog)
+
+ router
+ .route("/specified-month/:month")
+ .get(workLogController.getSpecifiedMonthWorkLog)
+
+ router
+ .route("/all-users")
+ .get(workLogController.getUsersWorkLog)
 
   module.exports = router;

@@ -21,7 +21,7 @@ var corsOptions = {
 
 const sequelize = require("./src/config/database")
 
-sequelize.sync().then((res:Response) => {
+sequelize.sync().then(() => {
   console.log("sequelize connected !");
 }).catch((error:any) => {
   console.error('Error syncing models with the database:', error);
@@ -41,7 +41,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      maxAge: 3600000, // 3600000 1 hour in milliseconds. The expiration time of the cookie to set it as a persistent cookie.
+      maxAge: 1000 * 60 * 60 * 24 * 30, // 3600000 1 hour in milliseconds. The expiration time of the cookie to set it as a persistent cookie.
       sameSite: true
     }
   })

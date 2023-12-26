@@ -27,4 +27,5 @@ const WorkLog = sequelize.define(
 
 WorkLog.belongsTo(DayWorkLog, { foreignKey: 'dayWorkLogId' });
 DayWorkLog.hasMany(WorkLog, {foreignKey: 'dayWorkLogId'});
+
 module.exports = WorkLog;

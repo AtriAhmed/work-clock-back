@@ -21,4 +21,9 @@ router
   // DELETE "/api/user/:id"
   .delete(userController.deleteUserById); // delete a user by ID
 
+  router
+  .route('/profile/:id')
+  // PUT "/api/user/:id" Example Request: { "vals": ["test_user", "111111", 1] }
+  .put(userController.updateProfile) // update a user by ID
+
   module.exports = router;

@@ -2,10 +2,9 @@ import { DataTypes } from "sequelize";
 const sequelize = require('../config/database.ts');
 
 const User = require('./User')
-const WorkLog = require('./WorkLog')
 
-const DayWorkLog = sequelize.define(
-  "DayWorkLog",
+const LeaveRequest = sequelize.define(
+  "LeaveRequest",
   {
     userId: {
         type: DataTypes.INTEGER,
@@ -15,25 +14,27 @@ const DayWorkLog = sequelize.define(
           key: "_id", // Replace with the actual primary key of DayWorkLog
         },
       },
-    date: {
+    startDate: {
       type: DataTypes.DATEONLY,
       allowNull: false,
     },
-    weekDay:{
-type: DataTypes.TINYINT.UNSIGNED, 
-allowNull:false
-    },
-    totalWorkTime: {
-      type: DataTypes.FLOAT,
+    endDate: {
+      type: DataTypes.DATEONLY,
       allowNull: false,
-      defaultValue: 0, // You can set an initial value if needed
+    },
+    description:{
+      type: DataTypes.TEXT,
+    },
+    status:{
+type: DataTypes.TINYINT, 
+allowNull:false,
+defaultValue: 0
     },
   }
 );
 
-DayWorkLog.belongsTo(User, { foreignKey: 'userId' });
-User.hasMany(DayWorkLog, {foreignKey: 'userId'});
+LeaveRequest.belongsTo(User, { foreignKey: 'userId' });
 
-// DayWorkLog.sync({alter:true})
+  // LeaveRequest.sync({alter:true})
 
-module.exports = DayWorkLog;
+module.exports = LeaveRequest;
